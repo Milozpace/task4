@@ -4,13 +4,16 @@ project(test)
 
 set(CMAKE_CXX_STANDARD 17)
 
+find_package(OpenCV REQUIRED)
 
 add_executable(test main.cpp)
 
 
 target_include_directories(test 
     PRIVATE 
-    /opt/MVS/include)
+    /opt/MVS/include
+    )
 
 target_link_libraries(test 
-    /opt/MVS/lib/64/libMvCameraControl.so)
+    /opt/MVS/lib/64/libMvCameraControl.so
+    ${OpenCV_LIBS})

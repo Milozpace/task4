@@ -1,6 +1,9 @@
 #include <iostream>
 #include "MvCameraControl.h"
 #include <string>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
 
 bool PrintDeviceInfo(MV_CC_DEVICE_INFO* pstMVDevInfo)
 {
@@ -79,10 +82,24 @@ int main()
         {
             std::cout << "width:" << frame.stFrameInfo.nWidth << " ";
             std::cout << "height" << frame.stFrameInfo.nHeight << " ";
-            std::cout << "frame:" << frame.stFrameInfo.nFrameNum << std::endl;
+            std::cout << "frame:" << frame.stFrameInfo.nFrameNum << "  ";
+            std::cout << frame.stFrameInfo.enPixelType << std::endl;
 
+            cv::Mat raw(frame.stFrameInfo.nHeight,
+                        frame.stFrameInfo.nWidth,
+                        CV_8UC1,
+                        frame.pBufAddr);
+
+            cv::Mat bgr;
+            cv::cvtColor(raw, bgr, cv::COLOR_BayerRGGB2BGR);
+            
             MV_CC_FreeImageBuffer(handle, &frame);
 
+            cv::imshow("bgr", bgr);
+            bool saved = cv::imwrite("capture.png", bgr);
+            std::cout << (saved ? "save!" : "save error" ) << std::endl;
+            cv::waitKey(0);
+    
             count++;
         }
         else
@@ -90,7 +107,7 @@ int main()
             std::cout << "grabbing error" << std::endl;
         }
 
-        if(count >= 100)
+        if(count >= 0)
         {
             running = false;
         }
