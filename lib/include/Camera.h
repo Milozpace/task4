@@ -38,7 +38,10 @@ public:
 
 private:
     static int nRet;
-    void* handle;
+    void* handle = nullptr;
+
+    bool opened = false;
+    bool grabbing = false;
 
 
     MV_CC_DEVICE_INFO_LIST m_device_list{};//ps:写不写这个{}有什么区别

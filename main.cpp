@@ -7,9 +7,9 @@ int main()
 {
     if(Camera::init() != 1) return -1;
 
-    Camera::run_camera();
+    int result = Camera::run_camera();
 
     Camera::finalize();
 
-    return 0;
+    return result;
 }

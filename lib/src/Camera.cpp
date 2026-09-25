@@ -68,8 +68,8 @@ bool PrintDeviceInfo(MV_CC_DEVICE_INFO* pstMVDevInfo)
 
 
 Camera::Camera()
-    : handle(NULL)
 {
+    std::cout << "Hello" << std::endl;
 }
 
 // 初始化SDK
@@ -165,6 +165,7 @@ int Camera::open_camera()
     else
     {
         std::cout << "OpenDevice succeed!" << std::endl;
+        opened = true;
         return 1;
     }
 }
@@ -194,6 +195,7 @@ int Camera::start_grabbing()
     else
     {
         std::cout << "StartGrabbing succeed!" << std::endl;
+        grabbing = true;
         return 1;
     }
 }
@@ -262,6 +264,7 @@ int Camera::stop_grabbing()
     else
     {
         std::cout << "MV_CC_CloseDevice succeed!" << std::endl;
+        grabbing = false;
         return 1;
     }
 }
@@ -280,6 +283,7 @@ int Camera::close_camera()
     else
     {
         std::cout << "CloseDevice succeed!" << std::endl;
+        opened = false;
         return 1;
     }
 }
@@ -293,8 +297,25 @@ void Camera::finalize()
 // 析构函数
 Camera::~Camera()
 {
-    nRet = MV_CC_DestroyHandle(handle);
-    handle = nullptr;
+    if(handle != nullptr)
+    {
+        if(grabbing == true)
+        {
+            stop_grabbing();
+            std::cout << "stop grabbing" << std::endl;
+        }
+
+        if(opened == true)
+        {
+            close_camera();
+            std::cout << "camera has closed" << std::endl;
+        }
+        
+        nRet = MV_CC_DestroyHandle(handle);
+        handle = nullptr;
+        std::cout << "destroy handle" << std::endl;
+    }
+
 }
 
 
