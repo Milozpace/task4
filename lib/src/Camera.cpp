@@ -1,5 +1,8 @@
 #include <Camera.h>
 
+bool running = true;
+int count = 0;
+
 //复制
 bool PrintDeviceInfo(MV_CC_DEVICE_INFO* pstMVDevInfo)
 {
@@ -64,10 +67,9 @@ bool PrintDeviceInfo(MV_CC_DEVICE_INFO* pstMVDevInfo)
 }
 
 
-Camera::Camera(std::string name)
+Camera::Camera()
     : handle(NULL)
 {
-    //名字怎么取？
 }
 
 // 初始化SDK
@@ -76,7 +78,6 @@ int Camera::init()
     Camera::nRet = MV_OK;
 
     Camera::nRet = MV_CC_Initialize();
-    std::cout << "Initialize " << (nRet == MV_OK ? "succeed" : "fail!")<< std::endl;
     if(nRet == MV_OK)
     {
         std::cout << "Initialize Succeed!" << std::endl;
@@ -107,11 +108,12 @@ int Camera::enum_camera()
                 MV_CC_DEVICE_INFO* pDeviceInfo = m_device_list.pDeviceInfo[i];
                 if (NULL == pDeviceInfo)
                 {
-                    break;
+                    return -1;
                 } 
                 PrintDeviceInfo(pDeviceInfo);    
-                return 1;        
+                      
             }  
+            return 1;  
         } 
         else
         {
@@ -124,9 +126,10 @@ int Camera::enum_camera()
 int Camera::create_handle()
 {
     //选择设备
-    std::cout << "Please Intput camera index: " << std::endl;
+    std::cout << "Please Intput camera index: " ;
     unsigned int nIndex = 0;
     std::cin >> nIndex;
+    std::cout << std::endl;
 
     if(nIndex >= m_device_list.nDeviceNum)
     {
@@ -166,9 +169,22 @@ int Camera::open_camera()
     }
 }
 
-// 开始取流
+// 设置线程&开始取流
 int Camera::start_grabbing()
 {
+    nRet = MV_CC_SetImageNodeNum(handle, 5);
+    
+    if(nRet != MV_OK)
+    {
+        std::cout << "SetImageNodeNum fail" << std::endl;
+        std::cout << "  Node: 1" << std::endl;
+    }
+    else
+    {
+        std::cout << "SetImageNodeNum succeed" << std::endl;
+        std::cout << "  Node: 5" << std::endl;
+    }
+
     nRet = MV_CC_StartGrabbing(handle);
     if(nRet != MV_OK)
     {
@@ -178,9 +194,61 @@ int Camera::start_grabbing()
     else
     {
         std::cout << "StartGrabbing succeed!" << std::endl;
-        return -1;
+        return 1;
     }
 }
+
+
+//展示图片
+int Camera::show_image()
+{
+    int n;
+    std::cout << "Input GetImage Number:" ;
+    std::cin >> n;
+    std::cout << std::endl;
+
+    while(running)
+    {
+    MV_FRAME_OUT frame = {0};
+    nRet = MV_CC_GetImageBuffer(handle,&frame, 1000);
+
+    if(nRet != MV_OK)
+    {
+        std::cout << "GetImage fail!" << std::endl;
+        return -1;
+    }
+    else
+    {
+        std::cout << "width:" << frame.stFrameInfo.nWidth << " ";
+        std::cout << "height" << frame.stFrameInfo.nHeight << " ";
+        std::cout << "frame:" << frame.stFrameInfo.nFrameNum << "  ";
+        std::cout << std::endl;
+
+        cv::Mat raw(frame.stFrameInfo.nHeight,
+                    frame.stFrameInfo.nWidth,
+                    CV_8UC1,
+                    frame.pBufAddr);
+
+        cv::Mat bgr;
+        cv::cvtColor(raw, bgr, cv::COLOR_BayerRGGB2BGR);
+        
+        MV_CC_FreeImageBuffer(handle, &frame);
+
+        cv::imshow("bgr", bgr);
+        cv::waitKey(1);
+
+        count++;
+    }
+
+    if(count >= n)
+    {
+        running = false;
+    }
+    
+    }
+    return 1;
+}
+
 
 // 停止取流
 int Camera::stop_grabbing()
@@ -203,7 +271,7 @@ int Camera::close_camera()
 {
     nRet = MV_CC_CloseDevice(handle);
     
-    if(nRet == MV_OK)
+    if(nRet != MV_OK)
     {
         std::cout << "CloseDevice fail!" << std::endl;
         return -1;
@@ -226,5 +294,29 @@ void Camera::finalize()
 Camera::~Camera()
 {
     nRet = MV_CC_DestroyHandle(handle);
-    //这里是否有必要再去做什么handle = NULL,因为这里进行析构之后，类里面的handle就已经被清理了
+    handle = nullptr;
+}
+
+
+//run!
+int Camera::run_camera()
+{
+    Camera cam;
+
+    if(cam.enum_camera()!= 1) return -1;
+
+    if(cam.create_handle() != 1) return -1;
+
+    if(cam.open_camera() != 1) return -1;
+
+    if(cam.start_grabbing() != 1) return -1;
+
+    //开始取图
+    if(cam.show_image() != 1) return -1;
+
+    if(cam.stop_grabbing() != 1) return -1;
+
+    if(cam.close_camera() != 1) return -1;
+
+    return 0;
 }

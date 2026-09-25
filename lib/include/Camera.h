@@ -10,7 +10,7 @@
 class Camera
 {
 public:
-    Camera(std::string name); //构建函数
+    Camera(); //构建函数
 
     static int init();//初始化SDK
 
@@ -22,6 +22,10 @@ public:
 
     int start_grabbing();//开始取流
 
+    
+    int show_image();//获取并展示图片
+
+
     int stop_grabbing();//停止取流
 
     int close_camera();//关闭相机
@@ -29,6 +33,9 @@ public:
     static void finalize();
 
     ~Camera();//析构
+public:
+    static int run_camera();
+
 private:
     static int nRet;
     void* handle;

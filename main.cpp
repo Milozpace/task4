@@ -2,23 +2,12 @@
 
 int Camera::nRet;
 
+
 int main()
 {
-    Camera::init();
+    if(Camera::init() != 1) return -1;
 
-{
-    Camera cam("nikon");
-
-    cam.enum_camera();
-
-    cam.create_handle();
-
-    cam.open_camera();
-
-    cam.start_grabbing();
-
-    cam.stop_grabbing();
-}
+    Camera::run_camera();
 
     Camera::finalize();
 
