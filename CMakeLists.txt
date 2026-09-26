@@ -20,19 +20,3 @@ target_link_libraries(
     Camera
 )
 
-
-#生成测试程序
-#[[add_executable(test test.cpp)
-
-target_include_directories(
-    test 
-    PRIVATE 
-    /opt/MVS/include
-    )
-
-target_link_libraries(
-    test 
-    /opt/MVS/lib/64/libMvCameraControl.so
-    ${OpenCV_LIBS}
-    )
-]]

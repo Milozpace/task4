@@ -7,26 +7,16 @@ int main()
     {
         Camera cam1;
 
-        Camera::search_camera();//未初始化，搜索失败测试
         record = Camera::set_up();
         
-        if(record == 1)
-        {
-            record = cam1.run_camera();
-        }
-        
-        if(record == 1)
-        {
-            record = cam1.capture_image();
-        }
+        if(record == 1) {record = cam1.run_camera();}
 
-        if(record == 1)
-        {
-            record = cam1.close_camera();
-        }
+        if(record == 1) {record = cam1.get_image();}
 
+        if(record == 1) {record = cam1.stop_run_camera();}
+            
+    
         if(record == 1) record = 0;
-        
     }
 
     if(Camera::finalize() != 1) return -2;

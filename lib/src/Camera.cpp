@@ -1,9 +1,10 @@
 #include <Camera.h>
 
+//static变量定义
 bool Camera::initalized = false;
 MV_CC_DEVICE_INFO_LIST Camera::m_device_list{};
 
-//复制
+//打印设备信息函数（c）
 bool PrintDeviceInfo(MV_CC_DEVICE_INFO* pstMVDevInfo)
 {
     if (NULL == pstMVDevInfo)
@@ -68,9 +69,8 @@ bool PrintDeviceInfo(MV_CC_DEVICE_INFO* pstMVDevInfo)
 
 
 Camera::Camera()
-    : nRet(MV_OK)
 {
-    std::cout << "Hello" << std::endl;
+    std::cout << "Camera created!" << std::endl;
 }
 
 // 初始化SDK
@@ -137,7 +137,7 @@ int Camera::create_handle()
         return -1;
     }
 
-    //创造
+    //创造句柄
     nRet = MV_CC_CreateHandle(&handle, m_device_list.pDeviceInfo[nIndex]);
 
     if (nRet != MV_OK)
@@ -170,7 +170,7 @@ int Camera::open_camera()
     }
 }
 
-// 设置线程&开始取流
+// 设置node&开始取流
 int Camera::start_grabbing()
 {
     nRet = MV_CC_SetImageNodeNum(handle, 5);
@@ -196,7 +196,6 @@ int Camera::start_grabbing()
     {
         std::cout << "StartGrabbing succeed!" << std::endl;
         grabbing = true;
-        running = true;
 
         return 1;
     }
@@ -204,51 +203,41 @@ int Camera::start_grabbing()
 
 
 //展示图片
-int Camera::show_image()
+int Camera::get_image()
 {
-    int n;
-    std::cout << "Input GetImage Number:" ;
-    std::cin >> n;
-    std::cout << std::endl;
-
-    while(running)
+    while(true)
     {
-    MV_FRAME_OUT frame = {0};
-    nRet = MV_CC_GetImageBuffer(handle,&frame, 1000);
+        MV_FRAME_OUT frame = {0};
+        nRet = MV_CC_GetImageBuffer(handle,&frame, 1000);
 
-    if(nRet != MV_OK)
-    {
-        std::cout << "GetImage fail!" << std::endl;
-        return -1;
-    }
-    else
-    {
-        std::cout << "width:" << frame.stFrameInfo.nWidth << " ";
-        std::cout << "height" << frame.stFrameInfo.nHeight << " ";
-        std::cout << "frame:" << frame.stFrameInfo.nFrameNum << "  ";
-        std::cout << std::endl;
+        if(nRet != MV_OK)
+        {
+            std::cout << "GetImage fail!" << std::endl;
+            return -1;
+            break;
+        }
+        else
+        {
+            std::cout << "width:" << frame.stFrameInfo.nWidth << " ";
+            std::cout << "height" << frame.stFrameInfo.nHeight << " ";
+            std::cout << "frame:" << frame.stFrameInfo.nFrameNum << "  ";
+            std::cout << std::endl;
 
-        cv::Mat raw(frame.stFrameInfo.nHeight,
-                    frame.stFrameInfo.nWidth,
-                    CV_8UC1,
-                    frame.pBufAddr);
+            cv::Mat raw(frame.stFrameInfo.nHeight,
+                        frame.stFrameInfo.nWidth,
+                        CV_8UC1,
+                        frame.pBufAddr);
 
-        cv::Mat bgr;
-        cv::cvtColor(raw, bgr, cv::COLOR_BayerRGGB2BGR);
-        
-        MV_CC_FreeImageBuffer(handle, &frame);
+            cv::Mat bgr;
+            cv::cvtColor(raw, bgr, cv::COLOR_BayerRGGB2BGR);
+            
+            MV_CC_FreeImageBuffer(handle, &frame);
 
-        cv::imshow("bgr", bgr);
-        cv::waitKey(1);
+            cv::imshow("bgr", bgr);
+            int key = cv::waitKey(1);
+            if(key == 'q' || key == 27) {break;};
+        }
 
-        count++;
-    }
-
-    if(count >= n)
-    {
-        running = false;
-    }
-    
     }
     return 1;
 }
@@ -332,7 +321,9 @@ Camera::~Camera()
 
 }
 
-//////以下为可调用接口///////
+
+///以下为可调用接口
+
 
 //启动并枚举
 int Camera::set_up()
@@ -346,7 +337,6 @@ int Camera::set_up()
 //仅枚举（添加运行设备）
 void Camera::search_camera()
 {
-    std::cout << initalized << std::endl;
     if(initalized != true)
     {
         std::cout << "Search camera fail!" << " You haven't initalize." << std::endl;
@@ -362,22 +352,22 @@ int Camera::run_camera()
 {
     if(create_handle() != 1) return -1;
     if(open_camera() != 1) return -1;
-
-    return 1;
-}
-
-//取图
-int Camera::capture_image()
-{
     if(start_grabbing() != 1) return -1;
 
-    if(show_image() != 1) return -1;
+    return 1;
+}
 
+
+//停止取流并关闭相机
+int Camera::stop_run_camera()
+{
     if(stop_grabbing() != 1) return -1;
+    if(close_camera() != 1) return -1;
 
     return 1;
 }
 
-//关闭相机的定义在上面
+
+//END
 
 
