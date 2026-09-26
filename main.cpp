@@ -1,15 +1,35 @@
 #include <Camera.h>
 
-int Camera::nRet;
-
 
 int main()
 {
-    if(Camera::init() != 1) return -1;
+    int record = 1;
+    {
+        Camera cam1;
 
-    int result = Camera::run_camera();
+        Camera::search_camera();//未初始化，搜索失败测试
+        record = Camera::set_up();
+        
+        if(record == 1)
+        {
+            record = cam1.run_camera();
+        }
+        
+        if(record == 1)
+        {
+            record = cam1.capture_image();
+        }
 
-    Camera::finalize();
+        if(record == 1)
+        {
+            record = cam1.close_camera();
+        }
 
-    return result;
+        if(record == 1) record = 0;
+        
+    }
+
+    if(Camera::finalize() != 1) return -2;
+
+    return record;
 }

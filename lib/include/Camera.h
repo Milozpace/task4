@@ -12,9 +12,15 @@ class Camera
 public:
     Camera(); //构建函数
 
-    static int init();//初始化SDK
+    Camera(const Camera&) = delete;
+    Camera& operator=(const Camera&) = delete;//禁止复制（改进）
 
-    int enum_camera();//枚举相机(并打印)
+    ~Camera();//析构
+
+private:
+    static int initalize();//初始化SDK
+
+    static int enum_camera();//枚举相机(并打印)
 
     int create_handle();//创造句柄
 
@@ -22,28 +28,37 @@ public:
 
     int start_grabbing();//开始取流
 
-    
-    int show_image();//获取并展示图片
-
+    int show_image();//取图
 
     int stop_grabbing();//停止取流
 
-    int close_camera();//关闭相机
-
-    static void finalize();
-
-    ~Camera();//析构
+    
+    
 public:
-    static int run_camera();
+    static int set_up();//启动：完成初始化并枚举设备
+
+    static void search_camera();//寻找设备：枚举（但不初始化）
+
+    int run_camera();//打开相机
+
+    int capture_image();//取图
+
+    int close_camera();//关闭
+
+    static int finalize();
 
 private:
-    static int nRet;
+    int nRet;
     void* handle = nullptr;
 
+    //状态跟踪
+    static bool initalized;
     bool opened = false;
     bool grabbing = false;
+    bool running = false;
 
+    int count = 0;//取帧时使用
 
-    MV_CC_DEVICE_INFO_LIST m_device_list{};//ps:写不写这个{}有什么区别
+    static MV_CC_DEVICE_INFO_LIST m_device_list;
 
 };

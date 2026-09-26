@@ -1,7 +1,7 @@
 #include <Camera.h>
 
-bool running = true;
-int count = 0;
+bool Camera::initalized = false;
+MV_CC_DEVICE_INFO_LIST Camera::m_device_list{};
 
 //复制
 bool PrintDeviceInfo(MV_CC_DEVICE_INFO* pstMVDevInfo)
@@ -68,19 +68,18 @@ bool PrintDeviceInfo(MV_CC_DEVICE_INFO* pstMVDevInfo)
 
 
 Camera::Camera()
+    : nRet(MV_OK)
 {
     std::cout << "Hello" << std::endl;
 }
 
 // 初始化SDK
-int Camera::init()
+int Camera::initalize()
 {
-    Camera::nRet = MV_OK;
-
-    Camera::nRet = MV_CC_Initialize();
-    if(nRet == MV_OK)
+    if(MV_CC_Initialize() == MV_OK)
     {
         std::cout << "Initialize Succeed!" << std::endl;
+        initalized = true;
         return 1;
     }
     else
@@ -93,10 +92,10 @@ int Camera::init()
 // 枚举设备
 int Camera::enum_camera()
 {
-    nRet = MV_CC_EnumDevices(MV_GIGE_DEVICE | MV_USB_DEVICE | MV_GENTL_CAMERALINK_DEVICE | MV_GENTL_CXP_DEVICE | MV_GENTL_XOF_DEVICE | MV_GENTL_XOC_DEVICE, &m_device_list);
-        if (nRet != MV_OK)
+    int n = MV_CC_EnumDevices(MV_GIGE_DEVICE | MV_USB_DEVICE | MV_GENTL_CAMERALINK_DEVICE | MV_GENTL_CXP_DEVICE | MV_GENTL_XOF_DEVICE | MV_GENTL_XOC_DEVICE, &m_device_list);
+        if (n != MV_OK)
         {
-            printf("EnumDevices fail! nRet [%x]\n", nRet);
+            printf("EnumDevices fail! nRet [%x]\n", n);
             return -1;
         }
 
@@ -120,12 +119,13 @@ int Camera::enum_camera()
             printf("Find No Devices!\n");
             return -1;
         }
+
 }
 
-// 选择设备并创建句柄
+// 创建句柄
 int Camera::create_handle()
 {
-    //选择设备
+    //输入编号并选择
     std::cout << "Please Intput camera index: " ;
     unsigned int nIndex = 0;
     std::cin >> nIndex;
@@ -137,7 +137,7 @@ int Camera::create_handle()
         return -1;
     }
 
-    //绑定设备（句柄）
+    //创造
     nRet = MV_CC_CreateHandle(&handle, m_device_list.pDeviceInfo[nIndex]);
 
     if (nRet != MV_OK)
@@ -196,6 +196,8 @@ int Camera::start_grabbing()
     {
         std::cout << "StartGrabbing succeed!" << std::endl;
         grabbing = true;
+        running = true;
+
         return 1;
     }
 }
@@ -258,12 +260,12 @@ int Camera::stop_grabbing()
     nRet = MV_CC_StopGrabbing(handle);
     if(nRet != MV_OK)
     {
-        std::cout << "MV_CC_CloseDevice fail!" << std::endl;
+        std::cout << "Stop grabbing fail!" << std::endl;
         return -1;
     }
     else
     {
-        std::cout << "MV_CC_CloseDevice succeed!" << std::endl;
+        std::cout << "Stop grabbing succeed!" << std::endl;
         grabbing = false;
         return 1;
     }
@@ -276,7 +278,7 @@ int Camera::close_camera()
     
     if(nRet != MV_OK)
     {
-        std::cout << "CloseDevice fail!" << std::endl;
+        std::cout << "CloseDevice failed!" << std::endl;
         return -1;
     }
 
@@ -288,10 +290,22 @@ int Camera::close_camera()
     }
 }
 
-void Camera::finalize()
+//反初始化
+int Camera::finalize()
 {
-    MV_CC_Finalize();
-    std::cout << "exit" << std::endl;
+    int result = MV_CC_Finalize();
+
+    if(result != MV_OK)
+    {
+        std::cout << "finalize fail!" << std::endl;
+        return -1;
+    }
+    else
+    {
+        std::cout << "exit" << std::endl;
+        initalized = false;
+        return 1;
+    }
 }
 
 // 析构函数
@@ -318,26 +332,52 @@ Camera::~Camera()
 
 }
 
+//////以下为可调用接口///////
 
-//run!
+//启动并枚举
+int Camera::set_up()
+{
+    if(Camera::initalize() != 1) return -1;
+    if(Camera::enum_camera() != 1) return -1;
+    
+    return 1;
+}
+
+//仅枚举（添加运行设备）
+void Camera::search_camera()
+{
+    std::cout << initalized << std::endl;
+    if(initalized != true)
+    {
+        std::cout << "Search camera fail!" << " You haven't initalize." << std::endl;
+    }
+    else
+    {
+        Camera::enum_camera();
+    }
+}
+
+//运行相机
 int Camera::run_camera()
 {
-    Camera cam;
+    if(create_handle() != 1) return -1;
+    if(open_camera() != 1) return -1;
 
-    if(cam.enum_camera()!= 1) return -1;
-
-    if(cam.create_handle() != 1) return -1;
-
-    if(cam.open_camera() != 1) return -1;
-
-    if(cam.start_grabbing() != 1) return -1;
-
-    //开始取图
-    if(cam.show_image() != 1) return -1;
-
-    if(cam.stop_grabbing() != 1) return -1;
-
-    if(cam.close_camera() != 1) return -1;
-
-    return 0;
+    return 1;
 }
+
+//取图
+int Camera::capture_image()
+{
+    if(start_grabbing() != 1) return -1;
+
+    if(show_image() != 1) return -1;
+
+    if(stop_grabbing() != 1) return -1;
+
+    return 1;
+}
+
+//关闭相机的定义在上面
+
+
