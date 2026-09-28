@@ -74,29 +74,29 @@ Camera::Camera()
 }
 
 // 初始化SDK
-int Camera::initalize()
+bool Camera::initalize()
 {
     if(MV_CC_Initialize() == MV_OK)
     {
         std::cout << "Initialize Succeed!" << std::endl;
         initalized = true;
-        return 1;
+        return true;
     }
     else
     {
         std::cout << "Initialize fail!" << std::endl;
-        return -1;
+        return false;
     }
 }
 
 // 枚举设备
-int Camera::enum_camera()
+bool Camera::enum_camera()
 {
     int n = MV_CC_EnumDevices(MV_GIGE_DEVICE | MV_USB_DEVICE | MV_GENTL_CAMERALINK_DEVICE | MV_GENTL_CXP_DEVICE | MV_GENTL_XOF_DEVICE | MV_GENTL_XOC_DEVICE, &m_device_list);
         if (n != MV_OK)
         {
             printf("EnumDevices fail! nRet [%x]\n", n);
-            return -1;
+            return false;
         }
 
         if (m_device_list.nDeviceNum > 0)
@@ -107,23 +107,23 @@ int Camera::enum_camera()
                 MV_CC_DEVICE_INFO* pDeviceInfo = m_device_list.pDeviceInfo[i];
                 if (NULL == pDeviceInfo)
                 {
-                    return -1;
+                    return false;
                 } 
                 PrintDeviceInfo(pDeviceInfo);    
                       
             }  
-            return 1;  
+            return true;  
         } 
         else
         {
             printf("Find No Devices!\n");
-            return -1;
+            return false;
         }
 
 }
 
 // 创建句柄
-int Camera::create_handle()
+bool Camera::create_handle()
 {
     //输入编号并选择
     std::cout << "Please Intput camera index: " ;
@@ -134,7 +134,7 @@ int Camera::create_handle()
     if(nIndex >= m_device_list.nDeviceNum)
     {
         std::cout << "Intput error!" << std::endl;
-        return -1;
+        return false;
     }
 
     //创造句柄
@@ -143,35 +143,35 @@ int Camera::create_handle()
     if (nRet != MV_OK)
     {
         std::cout << "CreateHandle fail! " << std::endl; 
-        return -1;
+        return false;
     }
     else
     {
         std::cout << "CreateHandle succeed! " << std::endl; 
-        return 1;
+        return true;
     }
 }
 
 // 打开设备
-int Camera::open_camera()
+bool Camera::open_camera()
 {
     nRet = MV_CC_OpenDevice(handle);
 
     if (nRet != MV_OK)
     {
         std::cout << "OpenDevice fail!" << std::endl;
-        return -1;
+        return false;
     }
     else
     {
         std::cout << "OpenDevice succeed!" << std::endl;
         opened = true;
-        return 1;
+        return true;
     }
 }
 
 // 设置node&开始取流
-int Camera::start_grabbing()
+bool Camera::start_grabbing()
 {
     nRet = MV_CC_SetImageNodeNum(handle, 5);
     
@@ -190,20 +190,20 @@ int Camera::start_grabbing()
     if(nRet != MV_OK)
     {
         std::cout << "StartGrabbing fail!" << std::endl;
-        return -1;
+        return false;
     }
     else
     {
         std::cout << "StartGrabbing succeed!" << std::endl;
         grabbing = true;
 
-        return 1;
+        return true;
     }
 }
 
 
 //展示图片
-int Camera::get_image()
+bool Camera::get_image()
 {
     while(true)
     {
@@ -213,7 +213,7 @@ int Camera::get_image()
         if(nRet != MV_OK)
         {
             std::cout << "GetImage fail!" << std::endl;
-            return -1;
+            return false;
             break;
         }
         else
@@ -239,61 +239,61 @@ int Camera::get_image()
         }
 
     }
-    return 1;
+    return true;
 }
 
 
 // 停止取流
-int Camera::stop_grabbing()
+bool Camera::stop_grabbing()
 {
     nRet = MV_CC_StopGrabbing(handle);
     if(nRet != MV_OK)
     {
         std::cout << "Stop grabbing fail!" << std::endl;
-        return -1;
+        return false;
     }
     else
     {
         std::cout << "Stop grabbing succeed!" << std::endl;
         grabbing = false;
-        return 1;
+        return true;
     }
 }
 
 // 关闭设备
-int Camera::close_camera()
+bool Camera::close_camera()
 {
     nRet = MV_CC_CloseDevice(handle);
     
     if(nRet != MV_OK)
     {
         std::cout << "CloseDevice failed!" << std::endl;
-        return -1;
+        return false;
     }
 
     else
     {
         std::cout << "CloseDevice succeed!" << std::endl;
         opened = false;
-        return 1;
+        return true;
     }
 }
 
 //反初始化
-int Camera::finalize()
+bool Camera::finalize()
 {
     int result = MV_CC_Finalize();
 
     if(result != MV_OK)
     {
         std::cout << "finalize fail!" << std::endl;
-        return -1;
+        return false;
     }
     else
     {
         std::cout << "exit" << std::endl;
         initalized = false;
-        return 1;
+        return true;
     }
 }
 
@@ -326,12 +326,12 @@ Camera::~Camera()
 
 
 //启动并枚举
-int Camera::set_up()
+bool Camera::set_up()
 {
-    if(Camera::initalize() != 1) return -1;
-    if(Camera::enum_camera() != 1) return -1;
+    if(Camera::initalize() != true) return false;
+    if(Camera::enum_camera() != true) return false;
     
-    return 1;
+    return true;
 }
 
 //仅枚举（添加运行设备）
@@ -348,23 +348,23 @@ void Camera::search_camera()
 }
 
 //运行相机
-int Camera::run_camera()
+bool Camera::run_camera()
 {
-    if(create_handle() != 1) return -1;
-    if(open_camera() != 1) return -1;
-    if(start_grabbing() != 1) return -1;
+    if(create_handle() != true) return false;
+    if(open_camera() != true) return false;
+    if(start_grabbing() != true) return false;
 
-    return 1;
+    return true;
 }
 
 
 //停止取流并关闭相机
-int Camera::stop_run_camera()
+bool Camera::stop_run_camera()
 {
-    if(stop_grabbing() != 1) return -1;
-    if(close_camera() != 1) return -1;
+    if(stop_grabbing() != true) return false;
+    if(close_camera() != true) return false;
 
-    return 1;
+    return true;
 }
 
 

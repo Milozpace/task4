@@ -16,32 +16,32 @@ public:
     ~Camera();//析构
 
 private:
-    static int initalize();//初始化SDK
+    static bool initalize();//初始化SDK
 
-    static int enum_camera();//枚举相机(并打印)
+    static bool enum_camera();//枚举相机(并打印)
 
-    int create_handle();//创造句柄
+    bool create_handle();//创造句柄
 
-    int open_camera();//打开相机
+    bool open_camera();//打开相机
 
-    int start_grabbing();//开始取流
+    bool start_grabbing();//开始取流
 
-    int stop_grabbing();//停止取流
+    bool stop_grabbing();//停止取流
 
-    int close_camera();//关闭相机
+    bool close_camera();//关闭相机
 
 public:
-    static int set_up();//启动：完成初始化并枚举设备
+    static bool set_up();//启动：完成初始化并枚举设备
 
     static void search_camera();//寻找设备：枚举（但不初始化）
 
-    int run_camera();//运行相机
+    bool run_camera();//运行相机
 
-    int get_image();//取图
+    bool get_image();//取图
 
-    int stop_run_camera();//停止相机运行
+    bool stop_run_camera();//停止相机运行
 
-    static int finalize();//反初始化
+    static bool finalize();//反初始化
 
 private:
     int nRet = MV_OK;
