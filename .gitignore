@@ -1,4 +1,6 @@
 teaching/
 docs/
 build/
-test.cpp
+
+
+.vscode/
