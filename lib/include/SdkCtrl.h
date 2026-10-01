@@ -3,10 +3,9 @@
 
 #include <MvCameraControl.h>
 
-//初始化
+int cc_initailize();
 
+int cc_enum_device(MV_CC_DEVICE_INFO_LIST list);
 
-//枚举
-
-//反初始化
+int cc_finalize();
 
