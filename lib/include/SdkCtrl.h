@@ -5,7 +5,7 @@
 
 int cc_initailize();
 
-int cc_enum_device(MV_CC_DEVICE_INFO_LIST list);
+int cc_enum_devices(MV_CC_DEVICE_INFO_LIST& list);
 
 int cc_finalize();
 

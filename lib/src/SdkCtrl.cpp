@@ -78,7 +78,7 @@ int cc_initailize()
     return nRet;
 }
 
-int cc_enum_devices(MV_CC_DEVICE_INFO_LIST list)
+int cc_enum_devices(MV_CC_DEVICE_INFO_LIST& list)
 {
     int nRet = MV_CC_EnumDevices(MV_GIGE_DEVICE | MV_USB_DEVICE | MV_GENTL_CAMERALINK_DEVICE | MV_GENTL_CXP_DEVICE | MV_GENTL_XOF_DEVICE | MV_GENTL_XOC_DEVICE, &list);
     
@@ -90,7 +90,7 @@ int cc_enum_devices(MV_CC_DEVICE_INFO_LIST list)
     {
         for (int i = 0; i < list.nDeviceNum; i++)
         {
-printf("[device %d]:\n", i);
+            printf("[device %d]:\n", i);
             MV_CC_DEVICE_INFO* pDeviceInfo = list.pDeviceInfo[i];
             if (NULL == pDeviceInfo)
             {

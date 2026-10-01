@@ -1,12 +1,11 @@
 #include <Camera.h>
 
-Camera::Camera() {}
+Camera::Camera(){};
 
-Camera::Camera(MV_CC_DEVICE_INFO_LIST list, int n)
-{
-    create_handle(list, n);
-}
-
+// Camera::Camera(MV_CC_DEVICE_INFO_LIST& list)
+// {
+//     create_handle(list);
+// }
 
 Camera::~Camera()
 {
@@ -32,8 +31,17 @@ Camera::~Camera()
 }
 
 
-int Camera::create_handle(MV_CC_DEVICE_INFO_LIST list, int n)
+int Camera::create_handle(MV_CC_DEVICE_INFO_LIST& list)
 {
+    std::cout << "choose your camera index: " << std::endl;
+    int n;
+    std::cin >> n;
+    if(n >= list.nDeviceNum)
+    {
+        std::cout << "Intput error!" << std::endl;
+        return -1;
+    }
+
     int nRet = MV_CC_CreateHandle(&m_handle, list.pDeviceInfo[n]);
 
     if (nRet != MV_OK)
@@ -82,45 +90,28 @@ int Camera::start_grabbing()
 }
 
 
-//展示图片
-MV_FRAME_OUT Camera::get_image()
+int Camera::get_image(cv::Mat& img)
 {
-    while(true)
+    MV_FRAME_OUT frame = {};
+    int nRet = MV_CC_GetImageBuffer(m_handle,&frame, 1000);
+
+    if(nRet != MV_OK)
     {
-        MV_FRAME_OUT frame = {0};
-        int nRet = MV_CC_GetImageBuffer(m_handle,&frame, 1000);
-
-        if(nRet != MV_OK)
-        {
-            std::cout << "GetImage fail!" << std::endl;
-            break;
-        }
-        else
-        {
-            std::cout << "width:" << frame.stFrameInfo.nWidth << " ";
-            std::cout << "height" << frame.stFrameInfo.nHeight << " ";
-            std::cout << "frame:" << frame.stFrameInfo.nFrameNum << "  ";
-            std::cout << std::endl;
-
-            cv::Mat raw(frame.stFrameInfo.nHeight,
-                        frame.stFrameInfo.nWidth,
-                        CV_8UC1,
-                        frame.pBufAddr);
-
-            cv::Mat bgr;
-            cv::cvtColor(raw, bgr, cv::COLOR_BayerRGGB2BGR);
-            
-            MV_CC_FreeImageBuffer(m_handle, &frame);
-
-            cv::imshow("bgr", bgr);
-            int key = cv::waitKey(1);
-            if(key == 'q' || key == 27) {break;}
-        }
-        return frame;
+        std::cout << "GetImage fail!  " << nRet << std::endl;
     }
-    
-}
+    else
+    {
+        cv::Mat raw(frame.stFrameInfo.nHeight,
+                    frame.stFrameInfo.nWidth,
+                    CV_8UC1,
+                    frame.pBufAddr);
 
+        cv::cvtColor(raw, img, cv::COLOR_BayerRGGB2BGR);
+        
+        MV_CC_FreeImageBuffer(m_handle, &frame);
+    }
+    return nRet;
+}
 
 int Camera::stop_grabbing()
 {
