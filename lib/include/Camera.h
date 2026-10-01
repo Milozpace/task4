@@ -9,7 +9,7 @@ class Camera
 {
 public:
     Camera(); 
-    //Camera(MV_CC_DEVICE_INFO_LIST& list); 
+    Camera(MV_CC_DEVICE_INFO_LIST& list); 
 
     Camera(const Camera&) = delete;
     Camera& operator=(const Camera&) = delete;

@@ -2,10 +2,10 @@
 
 Camera::Camera(){};
 
-// Camera::Camera(MV_CC_DEVICE_INFO_LIST& list)
-// {
-//     create_handle(list);
-// }
+Camera::Camera(MV_CC_DEVICE_INFO_LIST& list)
+{
+    create_handle(list);
+}
 
 Camera::~Camera()
 {
@@ -33,13 +33,16 @@ Camera::~Camera()
 
 int Camera::create_handle(MV_CC_DEVICE_INFO_LIST& list)
 {
-    std::cout << "choose your camera index: " << std::endl;
     int n;
-    std::cin >> n;
-    if(n >= list.nDeviceNum)
+    if(list.nDeviceNum > 0)
     {
-        std::cout << "Intput error!" << std::endl;
-        return -1;
+        std::cout << "choose your camera index: " << std::endl;
+        std::cin >> n;
+        if(n >= list.nDeviceNum)
+        {
+            std::cout << "Intput error!" << std::endl;
+            return -1;
+        }
     }
 
     int nRet = MV_CC_CreateHandle(&m_handle, list.pDeviceInfo[n]);

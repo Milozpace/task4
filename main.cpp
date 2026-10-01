@@ -53,8 +53,8 @@ int main()
     
     if(OK == MV_OK)
     {
-        Camera cam1;
-        cam1.create_handle(stDeviceList);
+        Camera cam1(stDeviceList);
+        // cam1.create_handle(stDeviceList);
         OK = camera_test(cam1);
     }
     
