@@ -25,16 +25,22 @@ int camera_test(Camera& cam)
     OK = cam.start_grabbing();
     if(OK != MV_OK) {return OK;}
 
+    cam.get_exposure_time();
+    cam.get_gain_value();
+    cam.get_auto_exposure();
+
+    cam.set_auto_exposure(2);
+    cam.set_gain_value(4.0);
+
     while(true)
     {
         OK = cam.get_image(img);
         
         cv::imshow("image", img);
         int key = cv::waitKey(1);
-
-        if(key == 'q') {break;}
+        if(key == ' ' || key == 27) {break;}
     }
-
+    
     OK = cam.stop_grabbing();
     if(OK != MV_OK) {return OK;}
 
@@ -43,6 +49,7 @@ int camera_test(Camera& cam)
 
     return OK;
 }
+
 
 int main()
 {
@@ -53,8 +60,8 @@ int main()
     
     if(OK == MV_OK)
     {
-        Camera cam1(stDeviceList);
-        // cam1.create_handle(stDeviceList);
+        Camera cam1;
+        cam1.create_handle(stDeviceList);
         OK = camera_test(cam1);
     }
     

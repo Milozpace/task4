@@ -20,12 +20,19 @@ public:
     int create_handle(MV_CC_DEVICE_INFO_LIST& list);
     int open_device();
     int start_grabbing();
-    
-
     int get_image(cv::Mat& img);
+
+    int get_exposure_time();
+    int get_auto_exposure();
+    int get_gain_value();
+
+
+    int set_exposure_time(float fExposureTime);
+    int set_auto_exposure(unsigned int nExposureAuto);
+    int set_gain_value(float fGain);
+
     int stop_grabbing();
     int close_device();
-
 
 private:
     void* m_handle = nullptr;
