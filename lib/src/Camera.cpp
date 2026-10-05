@@ -65,7 +65,20 @@ int Camera::open_device()
     if (nRet != MV_OK)
     {
         std::cout << "OpenDevice fail!  " << nRet << std::endl;
+
+        int nRet = MV_CC_DestroyHandle(m_handle);
+        m_handle = nullptr;
+        
+        if(nRet == MV_OK)
+        {
+            std::cout << "destroy handle" << std::endl;
+        }
+        else
+        {
+            std::cout << "destroy handle fail!" << std::endl;
+        }
     }
+
     else
     {
         std::cout << "OpenDevice succeed!" << std::endl;
