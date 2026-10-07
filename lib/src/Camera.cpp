@@ -462,14 +462,28 @@ int Camera::get_image(cv::Mat& img)
                         frame.stFrameInfo.nWidth,
                         CV_8UC1,
                         frame.pBufAddr);
-
-            cv::cvtColor(raw, img, cv::COLOR_BayerRGGB2BGR);
+            bool cvt = false;
+            try
+            {
+                cv::cvtColor(raw, img, cv::COLOR_BayerRGGB2BGR);
+                cvt = true;
+            }
+            catch (const cv::Exception& e)
+            {
+                std::cout << "cvtColor failed: " << e.what() << std::endl;
+            }
 
             int nRet = MV_CC_FreeImageBuffer(m_handle, &frame);
             if (nRet != MV_OK)
             {
-                std::cout << "Free Image fail!" << std::endl;
+                std::cout << "Free Image fail: " << nRet << std::endl;
             }
+
+            if (cvt == false)
+            {
+                return -1;
+            }
+
             return nRet;
         }
 
