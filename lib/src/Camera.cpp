@@ -241,7 +241,7 @@ int Camera::set_auto_exposure(unsigned int nExposureAuto)
 
         if (MV_OK == nRet)
         {
-            if (0 <= nExposureAuto && nExposureAuto < stExposureAuto.nSupportedNum)
+            if (nExposureAuto < stExposureAuto.nSupportedNum)
             {
                 nRet = MV_CC_SetEnumValue(m_handle, "ExposureAuto", nExposureAuto);
                 if (MV_OK == nRet)
