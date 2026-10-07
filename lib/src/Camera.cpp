@@ -86,7 +86,7 @@ int Camera::open_device()
 
 int Camera::start_grabbing()
 {
-    if (m_opened == true && m_handle != nullptr && m_grabbing == false)
+    if (m_opened == true && m_grabbing == false)
     {
         int nRet = MV_CC_StartGrabbing(m_handle);
 
@@ -111,7 +111,7 @@ int Camera::start_grabbing()
 
 int Camera::get_exposure_time()
 {
-    if (m_handle != nullptr && m_opened == true)
+    if (m_opened == true)
     {
         MVCC_FLOATVALUE stExposureTime = {0};
         int nRet = MV_CC_GetFloatValue(m_handle, "ExposureTime", &stExposureTime);
@@ -128,12 +128,17 @@ int Camera::get_exposure_time()
         }
         return nRet;
     }
+    else
+    {
+        std::cout << "get ExposureTime failed!" << std::endl;
+        return -1;
+    }
 
 }
 
 int Camera::get_auto_exposure()
 {
-    if (m_handle != nullptr && m_opened == true)
+    if (m_opened == true)
     {
         MVCC_ENUMVALUE stExposureAuto = {0};
         int nRet = MV_CC_GetEnumValue(m_handle, "ExposureAuto", &stExposureAuto) ;
@@ -154,12 +159,17 @@ int Camera::get_auto_exposure()
 
         return nRet;
     }
+    else
+    {
+        std::cout << "set auto exposure fail!" << std::endl;
+        return -1;
+    }
 
 }
 
 int Camera::get_gain_value()
 {
-    if (m_handle != nullptr && m_opened == true)
+    if (m_opened == true)
     {
         MVCC_FLOATVALUE stGain = {0};
         int nRet = MV_CC_GetFloatValue(m_handle, "Gain", &stGain);
@@ -176,21 +186,26 @@ int Camera::get_gain_value()
         }
         return nRet;
     }
+    else
+    {
+        std::cout << "get Gain failed!" << std::endl;
+        return -1;
+    }
 
 }
 
 int Camera::set_exposure_time(float fExposureTime)
 {
-    if (m_handle != nullptr && m_opened == true)
+    if (m_opened == true)
     {
         MVCC_FLOATVALUE stExposureTime = {0};
         int nRet = MV_CC_GetFloatValue(m_handle, "ExposureTime", &stExposureTime);
 
         if (MV_OK == nRet)
         { 
-            if (stExposureTime.fMin <= fExposureTime && fExposureTime <= stExposureTime.fMin)
+            if (stExposureTime.fMin <= fExposureTime && fExposureTime <= stExposureTime.fMax)
             {
-                int nRet = MV_CC_SetFloatValue(m_handle, "ExposureTime", fExposureTime);
+                nRet = MV_CC_SetFloatValue(m_handle, "ExposureTime", fExposureTime);
                 if (MV_OK == nRet)
                 {
                     std::cout << "set exposure time OK!" << std::endl;
@@ -219,7 +234,7 @@ int Camera::set_exposure_time(float fExposureTime)
 
 int Camera::set_auto_exposure(unsigned int nExposureAuto)
 {
-    if (m_handle != nullptr && m_opened == true)
+    if (m_opened == true)
     {
         MVCC_ENUMVALUE stExposureAuto = {0};
         int nRet = MV_CC_GetEnumValue(m_handle, "ExposureAuto", &stExposureAuto);
@@ -228,7 +243,7 @@ int Camera::set_auto_exposure(unsigned int nExposureAuto)
         {
             if (0 <= nExposureAuto && nExposureAuto < stExposureAuto.nSupportedNum)
             {
-                int nRet = MV_CC_SetEnumValue(m_handle, "ExposureAuto", nExposureAuto);
+                nRet = MV_CC_SetEnumValue(m_handle, "ExposureAuto", nExposureAuto);
                 if (MV_OK == nRet)
                 {
                     std::cout << "set ExposureAuto OK!" << std::endl;
@@ -255,7 +270,7 @@ int Camera::set_auto_exposure(unsigned int nExposureAuto)
 
 int Camera::set_gain_value(float fGain)
 {
-    if (m_handle != nullptr && m_opened == true)
+    if (m_opened == true)
     {
         MVCC_FLOATVALUE stGain = {0};
         int nRet = MV_CC_GetFloatValue(m_handle, "Gain", &stGain);
@@ -263,7 +278,7 @@ int Camera::set_gain_value(float fGain)
         {
             if (stGain.fMin <= fGain && fGain <= stGain.fMax)
             {
-                int nRet = MV_CC_SetFloatValue(m_handle, "Gain", fGain);
+                nRet = MV_CC_SetFloatValue(m_handle, "Gain", fGain);
                 if (MV_OK == nRet)
                 {
                     std::cout << "set Gain OK!" << std::endl;
@@ -292,7 +307,7 @@ int Camera::set_gain_value(float fGain)
 
 int Camera::get_image(cv::Mat& img)//待处理：如果img不是那个大小呢？如果不是bgr呢？所以真的要输入一个img吗？
 {
-    if (m_handle != nullptr && m_grabbing == true)//问题：如果出现失败的情况呢？ 
+    if (m_grabbing == true)//问题：如果出现失败的情况呢？ 
     {
         MV_FRAME_OUT frame = {0};
         int nRet = MV_CC_GetImageBuffer(m_handle,&frame, 1000);
@@ -310,16 +325,21 @@ int Camera::get_image(cv::Mat& img)//待处理：如果img不是那个大小呢�
 
             cv::cvtColor(raw, img, cv::COLOR_BayerRGGB2BGR);
             
-            MV_CC_FreeImageBuffer(m_handle, &frame);
+            nRet = MV_CC_FreeImageBuffer(m_handle, &frame);
         }
         return nRet;
+    }
+    else
+    {
+        std::cout << "GetImage fail!" << std::endl;
+        return -1;
     }
 
 }
 
 int Camera::stop_grabbing()
 {
-    if (m_handle != nullptr && m_grabbing)
+    if (m_grabbing == true)
     {
         int nRet = MV_CC_StopGrabbing(m_handle);
         if(nRet != MV_OK)
@@ -344,7 +364,7 @@ int Camera::stop_grabbing()
 
 int Camera::close_device()
 {
-    if (m_handle != nullptr && m_opened == true && m_grabbing != true)
+    if (m_opened == true && m_grabbing != true)
     {
         int nRet = MV_CC_CloseDevice(m_handle);
         
