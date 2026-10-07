@@ -68,6 +68,8 @@ int Camera::cc_finalize()
         {
             std::cout << "Finalize succeed!" << std::endl;
         }
+        
+        Camera::initialized = false;
 
         return nRet;
     }
@@ -403,6 +405,11 @@ int Camera::set_auto_exposure(unsigned int nExposureAuto)
         
         return nRet;
     }
+    else
+    {
+        std::cout << "set ExposureAuto failed!" << std::endl;
+        return -1;
+    }
 
 }
 
@@ -462,6 +469,7 @@ int Camera::get_image(cv::Mat& img)
                         frame.stFrameInfo.nWidth,
                         CV_8UC1,
                         frame.pBufAddr);
+
             bool cvt = false;
             try
             {
@@ -471,6 +479,7 @@ int Camera::get_image(cv::Mat& img)
             catch (const cv::Exception& e)
             {
                 std::cout << "cvtColor failed: " << e.what() << std::endl;
+                img.release();
             }
 
             int nRet = MV_CC_FreeImageBuffer(m_handle, &frame);
