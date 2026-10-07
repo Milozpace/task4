@@ -1,5 +1,143 @@
 #include <Camera.h>
 
+bool Camera::initialized = false;
+
+int Camera::cc_initailize()
+{
+    int nRet = MV_CC_Initialize();
+    if(nRet != MV_OK)
+    {
+        std::cout << "Initailize fail  " << nRet << std::endl;
+    }
+    else
+    {
+        Camera::initialized = true;
+        std::cout << "Initailize succeed!" << std::endl;
+    }
+
+    return nRet;
+}
+
+int Camera::cc_enum_devices(MV_CC_DEVICE_INFO_LIST& list)
+{
+    if (Camera::initialized == true)
+    {
+        int nRet = MV_CC_EnumDevices(MV_GIGE_DEVICE | MV_USB_DEVICE | MV_GENTL_CAMERALINK_DEVICE | MV_GENTL_CXP_DEVICE | MV_GENTL_XOF_DEVICE | MV_GENTL_XOC_DEVICE, &list);
+        
+        if(nRet != MV_OK)
+        {
+            std::cout << "EnumDevices fail  " << nRet << std::endl;
+        }
+        if (list.nDeviceNum > 0)
+        {
+            for (int i = 0; i < list.nDeviceNum; i++)
+            {
+                printf("[device %d]:\n", i);
+                MV_CC_DEVICE_INFO* pDeviceInfo = list.pDeviceInfo[i];
+                if (NULL == pDeviceInfo)
+                {
+                    break;
+                }
+                PrintDeviceInfo(pDeviceInfo);            
+            }    
+        } 
+        else
+        {
+            std::cout << "Find No Devices!" << std::endl;
+        }
+
+        return nRet;
+    }
+    else
+    {
+        std::cout << "Please initialize first" << std::endl;
+        return -1;
+    }
+}
+
+int Camera::cc_finalize()
+{
+    if (Camera::initialized == true)
+    {
+        int nRet = MV_CC_Finalize();
+        if(nRet != MV_OK)
+        {
+            std::cout << "Finalize fail  " << nRet << std::endl;
+        }
+        else
+        {
+            std::cout << "Finalize succeed!" << std::endl;
+        }
+
+        return nRet;
+    }
+    else
+    {
+        std::cout << "You didn't initalize" << std::endl;
+        return -1;
+    }
+}
+
+void Camera::PrintDeviceInfo(MV_CC_DEVICE_INFO* pstMVDevInfo)
+{
+    if (NULL == pstMVDevInfo)
+    {
+        printf("The Pointer of pstMVDevInfo is NULL!\n");
+    }
+    if (pstMVDevInfo->nTLayerType == MV_GIGE_DEVICE)
+    {
+        int nIp1 = ((pstMVDevInfo->SpecialInfo.stGigEInfo.nCurrentIp & 0xff000000) >> 24);
+        int nIp2 = ((pstMVDevInfo->SpecialInfo.stGigEInfo.nCurrentIp & 0x00ff0000) >> 16);
+        int nIp3 = ((pstMVDevInfo->SpecialInfo.stGigEInfo.nCurrentIp & 0x0000ff00) >> 8);
+        int nIp4 = (pstMVDevInfo->SpecialInfo.stGigEInfo.nCurrentIp & 0x000000ff);
+
+        // ch:打印当前相机ip和用户自定义名字 | en:print current ip and user defined name
+        printf("Device Model Name: %s\n", pstMVDevInfo->SpecialInfo.stGigEInfo.chModelName);
+        printf("CurrentIp: %d.%d.%d.%d\n" , nIp1, nIp2, nIp3, nIp4);
+        printf("UserDefinedName: %s\n\n" , pstMVDevInfo->SpecialInfo.stGigEInfo.chUserDefinedName);
+    }
+    else if (pstMVDevInfo->nTLayerType == MV_USB_DEVICE)
+    {
+        printf("Device Model Name: %s\n", pstMVDevInfo->SpecialInfo.stUsb3VInfo.chModelName);
+        printf("UserDefinedName: %s\n\n", pstMVDevInfo->SpecialInfo.stUsb3VInfo.chUserDefinedName);
+    }
+    else if (pstMVDevInfo->nTLayerType == MV_GENTL_GIGE_DEVICE)
+    {
+        printf("UserDefinedName: %s\n", pstMVDevInfo->SpecialInfo.stGigEInfo.chUserDefinedName);
+        printf("Serial Number: %s\n", pstMVDevInfo->SpecialInfo.stGigEInfo.chSerialNumber);
+        printf("Model Name: %s\n\n", pstMVDevInfo->SpecialInfo.stGigEInfo.chModelName);
+    }
+    else if (pstMVDevInfo->nTLayerType == MV_GENTL_CAMERALINK_DEVICE)
+    {
+        printf("UserDefinedName: %s\n", pstMVDevInfo->SpecialInfo.stCMLInfo.chUserDefinedName);
+        printf("Serial Number: %s\n", pstMVDevInfo->SpecialInfo.stCMLInfo.chSerialNumber);
+        printf("Model Name: %s\n\n", pstMVDevInfo->SpecialInfo.stCMLInfo.chModelName);
+    }
+    else if (pstMVDevInfo->nTLayerType == MV_GENTL_CXP_DEVICE)
+    {
+        printf("UserDefinedName: %s\n", pstMVDevInfo->SpecialInfo.stCXPInfo.chUserDefinedName);
+        printf("Serial Number: %s\n", pstMVDevInfo->SpecialInfo.stCXPInfo.chSerialNumber);
+        printf("Model Name: %s\n\n", pstMVDevInfo->SpecialInfo.stCXPInfo.chModelName);
+    }
+    else if (pstMVDevInfo->nTLayerType == MV_GENTL_XOF_DEVICE)
+    {
+        printf("UserDefinedName: %s\n", pstMVDevInfo->SpecialInfo.stXoFInfo.chUserDefinedName);
+        printf("Serial Number: %s\n", pstMVDevInfo->SpecialInfo.stXoFInfo.chSerialNumber);
+        printf("Model Name: %s\n\n", pstMVDevInfo->SpecialInfo.stXoFInfo.chModelName);
+    }
+    else if (pstMVDevInfo->nTLayerType == MV_GENTL_XOC_DEVICE)
+    {
+        printf("UserDefinedName: %s\n", pstMVDevInfo->SpecialInfo.stXoCInfo.chUserDefinedName);
+        printf("Serial Number: %s\n", pstMVDevInfo->SpecialInfo.stXoCInfo.chSerialNumber);
+        printf("Model Name: %s\n\n", pstMVDevInfo->SpecialInfo.stXoCInfo.chModelName);
+    }
+    else
+    {
+        printf("Not support.\n");
+    }
+
+}
+
 Camera::Camera(){};
 
 Camera::~Camera()
@@ -307,13 +445,14 @@ int Camera::set_gain_value(float fGain)
 
 int Camera::get_image(cv::Mat& img)//待处理：如果img不是那个大小呢？如果不是bgr呢？所以真的要输入一个img吗？
 {
-    if (m_grabbing == true)//问题：如果出现失败的情况呢？ 
+    if (m_grabbing == true)
     {
         MV_FRAME_OUT frame = {0};
         int nRet = MV_CC_GetImageBuffer(m_handle,&frame, 1000);
 
         if(nRet != MV_OK)
         {
+            img.release();
             std::cout << "GetImage fail!  " << nRet << std::endl;
         }
         else

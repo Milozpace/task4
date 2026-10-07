@@ -8,6 +8,15 @@
 class Camera
 {
 public:
+    static int cc_initailize();
+    static int cc_enum_devices(MV_CC_DEVICE_INFO_LIST& list);
+    static int cc_finalize();
+
+private:
+    static void PrintDeviceInfo(MV_CC_DEVICE_INFO* pstMVDevInfo);
+    static bool initialized;
+
+public:
     Camera(); 
 
     Camera(const Camera&) = delete;
@@ -15,7 +24,6 @@ public:
 
     ~Camera();
 
-public:
     int create_handle(MV_CC_DEVICE_INFO_LIST& list, int n);
     int open_device();
     int start_grabbing();

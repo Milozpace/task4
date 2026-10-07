@@ -17,22 +17,3 @@ target_link_libraries(
     /opt/MVS/lib/64/libMvCameraControl.so
     ${OpenCV_LIBS}
     )
-
-#SdkCtrl库
-add_library(
-    SdkCtrl 
-    SHARED 
-    src/SdkCtrl.cpp)
-
-target_include_directories(
-    SdkCtrl 
-    PUBLIC 
-    include
-    /opt/MVS/include
-    )
-
-target_link_libraries(
-    SdkCtrl 
-    PUBLIC
-    /opt/MVS/lib/64/libMvCameraControl.so
-    )
