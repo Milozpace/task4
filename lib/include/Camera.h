@@ -9,7 +9,6 @@ class Camera
 {
 public:
     Camera(); 
-    Camera(MV_CC_DEVICE_INFO_LIST& list); 
 
     Camera(const Camera&) = delete;
     Camera& operator=(const Camera&) = delete;
@@ -17,7 +16,7 @@ public:
     ~Camera();
 
 public:
-    int create_handle(MV_CC_DEVICE_INFO_LIST& list);
+    int create_handle(MV_CC_DEVICE_INFO_LIST& list, int n);
     int open_device();
     int start_grabbing();
     int get_image(cv::Mat& img);
