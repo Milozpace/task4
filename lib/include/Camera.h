@@ -14,7 +14,8 @@ public:
 
 private:
     static void PrintDeviceInfo(MV_CC_DEVICE_INFO* pstMVDevInfo);
-    static bool initialized;
+    static bool m_initialized;
+    static int m_alive_num;
 
 public:
     Camera(); 

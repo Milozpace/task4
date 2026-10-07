@@ -1,6 +1,7 @@
 #include <Camera.h>
 
-bool Camera::initialized = false;
+bool Camera::m_initialized = false;
+int Camera::m_alive_num = 0;
 
 int Camera::cc_initailize()
 {
@@ -11,7 +12,7 @@ int Camera::cc_initailize()
     }
     else
     {
-        Camera::initialized = true;
+        Camera::m_initialized = true;
         std::cout << "Initailize succeed!" << std::endl;
     }
 
@@ -20,7 +21,7 @@ int Camera::cc_initailize()
 
 int Camera::cc_enum_devices(MV_CC_DEVICE_INFO_LIST& list)
 {
-    if (Camera::initialized == true)
+    if (Camera::m_initialized == true)
     {
         int nRet = MV_CC_EnumDevices(MV_GIGE_DEVICE | MV_USB_DEVICE | MV_GENTL_CAMERALINK_DEVICE | MV_GENTL_CXP_DEVICE | MV_GENTL_XOF_DEVICE | MV_GENTL_XOC_DEVICE, &list);
         
@@ -57,7 +58,7 @@ int Camera::cc_enum_devices(MV_CC_DEVICE_INFO_LIST& list)
 
 int Camera::cc_finalize()
 {
-    if (Camera::initialized == true)
+    if (Camera::m_initialized == true && m_alive_num == 0)
     {
         int nRet = MV_CC_Finalize();
         if(nRet != MV_OK)
@@ -68,8 +69,8 @@ int Camera::cc_finalize()
         {
             std::cout << "Finalize succeed!" << std::endl;
         }
-        
-        Camera::initialized = false;
+
+        Camera::m_initialized = false;
 
         return nRet;
     }
@@ -157,6 +158,7 @@ Camera::~Camera()
         }
         
         int nRet = MV_CC_DestroyHandle(m_handle);
+        m_alive_num--;
         m_handle = nullptr;
         std::cout << "destroy handle" << std::endl;
     }
@@ -179,6 +181,7 @@ int Camera::create_handle(MV_CC_DEVICE_INFO_LIST& list, int n)
             m_handle = new_handle;
             new_handle = nullptr;
             std::cout << "CreateHandle succeed! " << std::endl; 
+            m_alive_num++;
         }
         else
         {
