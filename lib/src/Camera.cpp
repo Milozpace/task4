@@ -443,7 +443,7 @@ int Camera::set_gain_value(float fGain)
   
 }
 
-int Camera::get_image(cv::Mat& img)//待处理：如果img不是那个大小呢？如果不是bgr呢？所以真的要输入一个img吗？
+int Camera::get_image(cv::Mat& img)
 {
     if (m_grabbing == true)
     {
@@ -454,6 +454,7 @@ int Camera::get_image(cv::Mat& img)//待处理：如果img不是那个大小呢�
         {
             img.release();
             std::cout << "GetImage fail!  " << nRet << std::endl;
+            return nRet;
         }
         else
         {
@@ -463,10 +464,16 @@ int Camera::get_image(cv::Mat& img)//待处理：如果img不是那个大小呢�
                         frame.pBufAddr);
 
             cv::cvtColor(raw, img, cv::COLOR_BayerRGGB2BGR);
-            
-            nRet = MV_CC_FreeImageBuffer(m_handle, &frame);
+
+            int nRet = MV_CC_FreeImageBuffer(m_handle, &frame);
+            if (nRet != MV_OK)
+            {
+                std::cout << "Free Image fail!" << std::endl;
+            }
+            return nRet;
         }
-        return nRet;
+
+
     }
     else
     {
@@ -503,7 +510,7 @@ int Camera::stop_grabbing()
 
 int Camera::close_device()
 {
-    if (m_opened == true && m_grabbing != true)
+    if (m_opened == true)
     {
         int nRet = MV_CC_CloseDevice(m_handle);
         
