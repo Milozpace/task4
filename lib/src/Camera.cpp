@@ -68,15 +68,13 @@ int Camera::cc_finalize()
         else
         {
             std::cout << "Finalize succeed!" << std::endl;
+            Camera::m_initialized = false;
         }
-
-        Camera::m_initialized = false;
-
         return nRet;
     }
     else
     {
-        std::cout << "You didn't initalize" << std::endl;
+        std::cout << "Finalize fail" << std::endl;
         return -1;
     }
 }
@@ -357,15 +355,21 @@ int Camera::set_exposure_time(float fExposureTime)
                 {
                     std::cout << "set exposure time failed!" << std::endl;
                 }
+                return nRet;
+            }
+            else
+            {
+                std::cout << "set exposure time failed!" << std::endl;
+                return -1;
             }
         }
 
         else
         {
             std::cout << "set exposure time failed!" << std::endl;
+            return -1;
         }
 
-        return nRet;
     }
     else
     {
@@ -395,18 +399,20 @@ int Camera::set_auto_exposure(unsigned int nExposureAuto)
                 {
                     std::cout << "set ExposureAuto failed!" << std::endl;
                 }
+                return nRet;
             }
             else
             {
                 std::cout << "set ExposureAuto failed!" << std::endl;
+                return -1;
             }
         }
         else
         {
             std::cout << "set ExposureAuto failed!" << std::endl;
+            return nRet;
         }
         
-        return nRet;
     }
     else
     {
@@ -435,22 +441,26 @@ int Camera::set_gain_value(float fGain)
                 {
                     std::cout << "set Gain failed!" << std::endl;
                 }
+                return nRet;
+            }
+            else
+            {
+                std::cout << "set Gain failed!" << std::endl;
+                return -1;
             }
         }
         else
         {
             std::cout << "set Gain failed!" << std::endl;
+            return nRet;
         }
-        return nRet;
+    
     }
-
     else
     {
         std::cout << "set Gain failed!" << std::endl;
         return -1;
     }
-
-  
 }
 
 int Camera::get_image(cv::Mat& img)

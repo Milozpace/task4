@@ -1,20 +1,18 @@
 #include <Camera.h>
-#include <SdkCtrl.h>
-
 
 int main()
 {
     int OK = MV_OK;
     MV_CC_DEVICE_INFO_LIST stDeviceList;
 
-    OK = cc_initailize();
+    OK = Camera::cc_initailize();
 
-    if(OK == MV_OK) {OK = cc_enum_devices(stDeviceList);}
+    if(OK == MV_OK) {OK = Camera::cc_enum_devices(stDeviceList);}
     
     if(OK == MV_OK)
     {
         Camera cam;
-        cam.create_handle(stDeviceList); 
+        OK = cam.create_handle(stDeviceList, 0); 
         cv::Mat img;
 
         if(OK == MV_OK) {OK = cam.open_device();}
@@ -29,22 +27,31 @@ int main()
 
         if(OK == MV_OK) 
         {
+            int fail_count = 0;
             while(true)
             {
                 OK = cam.get_image(img);
-                
-                cv::imshow("image", img);
-                int key = cv::waitKey(1);
-                if(key == ' ' || key == 27) {break;}
+                if (OK == MV_OK)
+                {
+                    fail_count = 0;
+                    cv::imshow("image", img);
+                    int key = cv::waitKey(1);
+                    if(key == ' ' || key == 27) {break;}
+                }
+                else
+                {
+                    fail_count++;
+                    if (fail_count > 100) {break;}
+                }
             }
         }
         
-        if(OK == MV_OK) {OK = cam.stop_grabbing();}
+        OK = cam.stop_grabbing();
         if(OK == MV_OK) {OK = cam.close_device();}
 
     }
     
-    cc_finalize();
+    Camera::cc_finalize();
     return OK;
 }
 
