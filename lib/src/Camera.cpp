@@ -158,13 +158,13 @@ Camera::~Camera()
         }
         
         int nRet = MV_CC_DestroyHandle(m_handle);
-        m_alive_num--;
-        m_handle = nullptr;
-        std::cout << "destroy handle" << std::endl;
+        if (nRet == MV_OK)
+        {
+            m_alive_num--;
+            m_handle = nullptr;
+        }
     }
-
 }
-
 
 int Camera::create_handle(MV_CC_DEVICE_INFO_LIST& list, int n)
 {
