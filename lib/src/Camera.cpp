@@ -206,7 +206,18 @@ int Camera::open_device()
         if (nRet != MV_OK)
         {
             std::cout << "OpenDevice fail!  " << nRet << std::endl;
-            //如果失败，相机处于关闭状态，后面的接口无法通过调用条件.但句柄依旧存在，允许再次尝试打开
+            int nRet = MV_CC_DestroyHandle(m_handle);
+            if (nRet == MV_OK)
+            {
+                std::cout << "Destroy Handle!" << nRet << std::endl;
+                m_handle!= nullptr;
+                m_alive_num--;
+            }
+            else
+            {
+                std::cout << "Destroy Handle fail" << nRet << std::endl;
+            }
+
         }
 
         else
@@ -234,6 +245,17 @@ int Camera::start_grabbing()
         if(nRet != MV_OK)
         {
             std::cout << "StartGrabbing fail!  " << nRet << std::endl;
+            int DesRet = MV_CC_DestroyHandle(m_handle);
+            if (DesRet == MV_OK)
+            {
+                std::cout << "Destroy Handle!" << std::endl;
+                m_handle!= nullptr;
+                m_alive_num--;
+            }
+            else
+            {
+                std::cout << "Destroy Handle fail" << DesRet << std::endl;
+            }
         }
         else
         {
@@ -527,6 +549,19 @@ int Camera::stop_grabbing()
         if(nRet != MV_OK)
         {
             std::cout << "Stop grabbing fail!" << std::endl;
+
+            int DesRet = MV_CC_DestroyHandle(m_handle);
+            if (DesRet == MV_OK)
+            {
+                std::cout << "Destroy Handle!" << std::endl;
+                m_handle!= nullptr;
+                m_alive_num--;
+            }
+            else
+            {
+                std::cout << "Destroy Handle fail" << DesRet << std::endl;
+            }
+
         }
         else
         {
@@ -553,6 +588,19 @@ int Camera::close_device()
         if(nRet != MV_OK)
         {
             std::cout << "CloseDevice failed!" << std::endl;
+
+            int DesRet = MV_CC_DestroyHandle(m_handle);
+            if (DesRet == MV_OK)
+            {
+                std::cout << "Destroy Handle!" << std::endl;
+                m_handle!= nullptr;
+                m_alive_num--;
+            }
+            else
+            {
+                std::cout << "Destroy Handle fail" << DesRet << std::endl;
+            }
+
         }
         else
         {
@@ -565,7 +613,6 @@ int Camera::close_device()
     {
         std::cout << "CloseDevice failed!" << std::endl;
         return -1;
-        //可以再细化，但暂时不做，比如输出对应的原因
     }
 }
 
